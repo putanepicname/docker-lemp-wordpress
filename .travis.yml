@@ -1,32 +1,35 @@
 sudo: required
-
 services: docker
-
 env:
   DOCKER_COMPOSE_VERSION: 1.11.2
-
 before_install:
-  - sudo apt-get update
-  - sudo apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y docker-engine
-  - sudo rm /usr/local/bin/docker-compose
-  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
-  - chmod +x docker-compose
-  - sudo mv docker-compose /usr/local/bin
-
+- sudo apt-get update
+- sudo apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y docker-engine
+- sudo rm /usr/local/bin/docker-compose
+- curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname
+  -s`-`uname -m` > docker-compose
+- chmod +x docker-compose
+- sudo mv docker-compose /usr/local/bin
 before_script:
-  - docker-compose build init
-  - docker-compose build php
-  - docker-compose pull db
-  - docker-compose pull nginx
-  - docker images
-  - docker-compose up -d db
-  - docker-compose up init
-  - docker-compose up -d php
-  - docker-compose up -d nginx
-  - sleep 30
-
+- docker-compose build init
+- docker-compose build php
+- docker-compose pull db
+- docker-compose pull nginx
+- docker images
+- docker-compose up -d db
+- docker-compose up init
+- docker-compose up -d php
+- docker-compose up -d nginx
+- sleep 30
 script:
-  - ./test.sh
-
-after_script:
-  - docker-compose down
+- "./test.sh"
+after_success:
+- docker tag tools epicname/tools:latest
+- docker tag php:7.1-fpm-wordpress epicname/php:7.1-fpm-wordpress
+- if [ "$TRAVIS_BRANCH" == "master" ]; then docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+  docker push epicname/tools:latest; docker push epicname/php:7.1-fpm-wordpress; fi
+- docker-compose down
+notifications:
+  slack:
+    rooms:
+      secure: H4KgAsAFaEOODQn2mWQNLflxA5UzAeR3gWtlqKUm+zrI6MaWEZQXytrbxPn5hUz4uzQvwtxhF4JSQHLVqkTuzxaZ8SJFwG7IcEWxsLOHqPPrH7HbIyWTvAj3kMu+orV+FQ31TE2kOiL3R4xLR5RKRpG9jRg6NZk3hT/vLEdzHL0i44yhESbNe/k1rmolnoEDPN3MNl0DOUudrucO97JCp20DaN5uqwbztxwuIlYfKdoFhJLOtMuuH/VCs+aXXd09LrTHLAhr82lCjf6T1wXVpC1iXAJ4S/VyyCKjw38FVjzdYEq9ysOsiGbp1VB8v9m9/EXVkptb8afzfl7KWIYy+J+HCRHTsrHOkGWoX+xmwFjXePlHG6gQhoSiHiakmvP8VlkuEdW1L25bYkwzCjllxvU4PyoT6Lgwy2oroKWPYhFK+kO3Yyv4uissL1WeCVRTlF2S/TFof8o+hr2o3z2xY7ZctkMBXKj+7Aht4eUW38myPlUVpGxL30cEfT8bmRpqwQ94LJDWkNrPASsyrNv4OPICCpPPw3uGfE3oFSUzWw3s1QBqbIoDg+7DLd4whjAbolOEFB42njGpbtgmtPvlT8dfroQJhO+i6shwuVcLvcDoMoax2mabuuTAvx5w0PdZeiKK0Q1htoUh2YlOVAKEh7u2kq7+IEVBesl8mW/b7Y0=
