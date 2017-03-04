@@ -14,12 +14,11 @@ before_install:
   - sudo mv docker-compose /usr/local/bin
 
 before_script:
-  - docker-compose build
+  - docker-compose build init
+  - docker-compose build php
   - docker images
-  - docker-compose create
-  - docker-compose start init db
-  - docker-compose start php nginx && sleep 10
-
+  - docker-compose up && sleep 60
+  
 script:
   - ./test.sh
 
