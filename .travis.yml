@@ -21,8 +21,10 @@ before_script:
   - docker images
   - docker-compose up -d db
   - docker-compose up init
-  - docker-compose up -d php
-  - docker-compose up -d nginx
+  - docker-compose up php
+  - docker-compose up nginx
+  - docker-compose up -d
+  - sleep 30
 
 script:
   - ./test.sh
