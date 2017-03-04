@@ -20,8 +20,10 @@ services:
     build: ./php
     image: php:7.1-fpm-wordpress
     links:
+      - init
       - db
     depends_on:
+      - init
       - db
     environment:
       MYSQL_PASSWORD: wordpress
