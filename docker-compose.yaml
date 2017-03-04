@@ -1,0 +1,46 @@
+version: '3'
+services:
+  init:
+    build: ./tools
+    image: tools
+    volumes:
+      - data:/srv
+    entrypoint:
+      - /bin/sh
+      - -c
+      - ansible-pull -U https://engineerhead@bitbucket.org/wyquest/ansible-wp.git -d /tmp/repo wp.yaml
+  db:
+    image: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: wordpress
+      MYSQL_PASSWORD: wordpress
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+  php:
+    build: ./php
+    image: php:7.1-fpm-wordpress
+    links:
+      - db
+    depends_on:
+      - db
+    environment:
+      MYSQL_PASSWORD: wordpress
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_HOST: db
+    volumes:
+      - data:/srv
+  nginx:
+    image: nginx
+    depends_on:
+      - php
+    links: 
+      - php
+    ports:
+      - "8000:80"
+    volumes:
+      - data:/srv
+      - ./nginx.conf:/etc/nginx/nginx.conf
+volumes:
+  data:
+    driver: local
